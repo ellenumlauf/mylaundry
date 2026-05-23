@@ -15,7 +15,7 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 @Route("prices")
 @Menu(order = 2, icon = LineAwesomeIconUrl.FILE)
 public class PricesView extends VerticalLayout {
-
+/* test*/
     public PricesView() {
         setSpacing(false);
 
