@@ -14,6 +14,8 @@ public class OrderService {
 
     public OrderService () {
         orders = new ArrayList<>(1000);
+        fillTestData();
+
     }
 
     public void fillTestData() {
@@ -52,6 +54,11 @@ public class OrderService {
         orders.add(new Order(LocalDate.of(2025, 4, 10), "Mia König", "Skirt", 13.8, 2, false));
         orders.add(new Order(LocalDate.of(2025, 4, 16), "Noah Hoff", "Jumper", 17.5, 1, false));
         orders.add(new Order(LocalDate.of(2025, 4, 21), "Sophie Lange", "LeatherJacket", 58.0, 1, true));
+    }
+
+    public ArrayList<Order> findAll() {
+
+        return new ArrayList<>(orders);
     }
 
     @Override

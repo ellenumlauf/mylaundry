@@ -33,13 +33,14 @@ public class Order {
     private static final String [] laundryTypes = {"Trousers", "Dress", "Skirt", "Jumper", "LeatherJacket"};
 
     public Order() {
-        setOrderId();
-        setOrderDate(LocalDate.now());
-        setCustomerName("unknown");
-        setLaundryType("Trousers");
-        setPrice(15.0);
-        setNumberLaundry(1);
-        setExpressService(false);
+        //setOrderId();
+        //setOrderDate(LocalDate.now());
+        //setCustomerName("unknown");
+        //setLaundryType("Trousers");
+        //setPrice(15.0);
+        //setNumberLaundry(1);
+        //setExpressService(false);
+        //er hat das alles rausgelöscht
     }
 
     public Order(LocalDate orderDate, String customerName, String laundryType, Double price, Integer numberLaundry, Boolean expressService) {
