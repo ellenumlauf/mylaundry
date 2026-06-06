@@ -6,11 +6,13 @@ import at.spengergasse.service.OrderService;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -30,7 +32,7 @@ public class OrdersView extends VerticalLayout {
     private final Button buttonAddOneEuro = new Button("Add One Euro");
     private final Button buttonRemoveAllExpressOrders = new Button("Remove All Expr-Orders");
     private final Button buttonAddInvalidData = new Button("Add Invalid Data");
-    private final Grid<Order> grid = new Grid<>(Order.class, true);
+    private final Grid<Order> grid = new Grid<>(Order.class, false);
     private final OrderService orderService;
 
     public OrdersView(@Autowired OrderService orderService) {
@@ -46,6 +48,42 @@ public class OrdersView extends VerticalLayout {
         buttonRemoveAllExpressOrders.addClickListener(event -> removeAllExpressOrders());
         buttonAddInvalidData.addClickListener(event -> addInvalidData());
         add(new HorizontalLayout(buttonRemoveAllOrders, buttonAddTenOrders, buttonAddOneEuro, buttonRemoveAllExpressOrders,buttonAddInvalidData));
+
+        grid.addColumn(order -> order.getOrderId())
+                .setHeader("Order ID")
+                .setSortable(true);
+        grid.addColumn(order -> order.getOrderDate())
+                .setHeader("Order Date")
+                .setSortable(true);
+        grid.addColumn(order -> order.getCustomerName())
+                .setHeader("Customer Name")
+                .setSortable(true);
+
+        Image shirt = new Image("icons/Shirt.png", "Shirtlogo");
+        shirt.setWidth("40px");
+        HorizontalLayout headerType = new HorizontalLayout(shirt, new Span("Type"));
+
+        grid.addColumn(order -> order.getLaundryType())
+                .setHeader(headerType)
+                .setSortable(true);
+        grid.addColumn(order -> order.getNumberLaundry())
+                .setHeader("Number")
+                .setSortable(true);
+        grid.addColumn(order -> order.getPrice())
+                .setHeader("Price per Item")
+                .setSortable(true);
+        grid.addColumn(order -> (order.getExpressService() == true) ? "Express" : "Normal")
+                .setHeader("Service")
+                .setSortable(true);
+        grid.addComponentColumn(order -> {
+                    Checkbox express = new Checkbox(order.getExpressService());
+                    express.setReadOnly(true);
+                    return express;
+                })
+                .setHeader("Service")
+                .setSortable(true);
+
+
 
         add(grid);
         reload();
