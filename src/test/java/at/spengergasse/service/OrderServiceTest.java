@@ -9,7 +9,7 @@ class OrderServiceTest {
     @Test
     void testToString() {
         OrderService mylaundry = new OrderService();
-        mylaundry.fillTestData();
+        mylaundry.fillTestData(true);
         System.out.println(mylaundry);
     }
 }
