@@ -1,14 +1,17 @@
 package at.spengergasse.views.orders;
 
 import at.spengergasse.domain.Order;
+import at.spengergasse.domain.OrderException;
 import at.spengergasse.service.OrderService;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
@@ -26,6 +29,7 @@ public class OrdersView extends VerticalLayout {
     private final Button buttonAddTenOrders = new Button("Add 10 orders");
     private final Button buttonAddOneEuro = new Button("Add One Euro");
     private final Button buttonRemoveAllExpressOrders = new Button("Remove All Expr-Orders");
+    private final Button buttonAddInvalidData = new Button("Add Invalid Data");
     private final Grid<Order> grid = new Grid<>(Order.class, true);
     private final OrderService orderService;
 
@@ -40,37 +44,80 @@ public class OrdersView extends VerticalLayout {
         buttonAddTenOrders.addClickListener(event -> addTenOrders());
         buttonAddOneEuro.addClickListener(event -> addOneEuro());
         buttonRemoveAllExpressOrders.addClickListener(event -> removeAllExpressOrders());
-        add(new HorizontalLayout(buttonRemoveAllOrders, buttonAddTenOrders, buttonAddOneEuro, buttonRemoveAllExpressOrders));
+        buttonAddInvalidData.addClickListener(event -> addInvalidData());
+        add(new HorizontalLayout(buttonRemoveAllOrders, buttonAddTenOrders, buttonAddOneEuro, buttonRemoveAllExpressOrders,buttonAddInvalidData));
 
         add(grid);
         reload();
     }
 
+    private void addInvalidData() {
+        try {
+            orderService.addInvalidData();
+            reload();
+        }
+        catch (OrderException e) {
+            // ergibt Fenster links unten
+            //Notification.show(e.getMessage());
+            ConfirmDialog dialog = new ConfirmDialog();
+            dialog.setHeader("Error");
+            dialog.setText(e.getMessage());
+            dialog.setConfirmText("OK");
+            dialog.open();
+            reload();
+        }
+    }
+
     private void removeAllOrders() {
-        orderService.removeAllOrders();
-        buttonRemoveAllOrders.setEnabled(false);
-        buttonRemoveAllExpressOrders.setEnabled(false);
-        buttonAddOneEuro.setEnabled(false);
-        reload();
+        try {
+            orderService.removeAllOrders();
+            buttonRemoveAllOrders.setEnabled(false);
+            buttonRemoveAllExpressOrders.setEnabled(false);
+            buttonAddOneEuro.setEnabled(false);
+            reload();
+        }
+        catch(OrderException e) {
+            Notification.show(e.getMessage());
+            reload();
+        }
     }
 
     private void addTenOrders() {
-        orderService.addTenOrders();
-        buttonRemoveAllOrders.setEnabled(true);
-        buttonRemoveAllExpressOrders.setEnabled(true);
-        buttonAddOneEuro.setEnabled(true);
-        reload();
+        try {
+            orderService.addTenOrders();
+            buttonRemoveAllOrders.setEnabled(true);
+            buttonRemoveAllExpressOrders.setEnabled(true);
+            buttonAddOneEuro.setEnabled(true);
+            reload();
+        }
+        catch(OrderException e) {
+            Notification.show(e.getMessage());
+            reload();
+        }
     }
 
     private void addOneEuro() {
-        orderService.addOneEuro();
-        reload();
+        try {
+            orderService.addOneEuro();
+            reload();
+        }
+        catch(OrderException e) {
+            Notification.show(e.getMessage());
+            reload();
+        }
     }
     private void removeAllExpressOrders() {
-        orderService.removeAllExpressOrders();
-        buttonRemoveAllExpressOrders.setEnabled(false);
-        reload();
+        try {
+            orderService.removeAllExpressOrders();
+            buttonRemoveAllExpressOrders.setEnabled(false);
+            reload();
+        }
+        catch(OrderException e) {
+            Notification.show(e.getMessage());
+            reload();
+        }
     }
+
 
     private void reload() {
         grid.setItems(orderService.findAll());

@@ -116,4 +116,8 @@ public class OrderService {
                 it.remove();
         }
     }
+
+    public void addInvalidData() {
+        orders.add(new Order(LocalDate.of(2025, 6, 13), "Nike Brahmer", "Dress", -3.5, 1, false));
+    }
 }
