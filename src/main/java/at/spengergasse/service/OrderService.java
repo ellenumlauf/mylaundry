@@ -1,5 +1,6 @@
 package at.spengergasse.service;
 
+import at.spengergasse.domain.OrderException;
 import org.springframework.stereotype.Service;
 import at.spengergasse.domain.Order;
 
@@ -119,5 +120,32 @@ public class OrderService {
 
     public void addInvalidData() {
         orders.add(new Order(LocalDate.of(2025, 6, 13), "Nike Brahmer", "Dress", -3.5, 1, false));
+    }
+
+    public void removeOneOrder(Long orderId) {
+        /*Order order;
+
+        for (Order o: orders) {
+            if(o.getOrderId().equals(orderId))
+                order = o;
+        }
+        orders.remove(order);*/
+        if(orderId == null)
+            throw new OrderException("Order Id is null!");
+
+        if(orders.removeIf(o -> o.getOrderId().equals(orderId)) == false)
+            throw new OrderException("Order does not exist!");
+    }
+
+    public void addOneItem(Long orderId) {
+        if(orderId == null)
+            throw new OrderException("Order Id is null!");
+
+        //orders.stream().filter() usw;
+        for(Order o: orders) {
+            if(o.getOrderId().equals(orderId))
+                o.setNumberLaundry(o.getNumberLaundry()+1);
+            // ==== 22min15 =======
+        }
     }
 }

@@ -80,13 +80,49 @@ public class OrdersView extends VerticalLayout {
                     express.setReadOnly(true);
                     return express;
                 })
+                // er hat .setHeader("Action")  nicht Service!!!!
                 .setHeader("Service")
                 .setSortable(true);
 
+        grid.addComponentColumn(order -> {
+                    Button delete = new Button("Delete");
+                    delete.addClickListener(e-> removeOneOrder(order.getOrderId()));
+                    return delete;
+                })
+                .setHeader("Action")
+                .setSortable(false);
 
+        grid.addComponentColumn(order -> {
+                Button addOneItem = new Button ("Add One Item");
+                addOneItem.addClickListener(e -> addOneItem(order.getOrderId()));
+                return addOneItem;
+            })
+            .setHeader("Action")
+                    .setSortable(false);
 
         add(grid);
         reload();
+    }
+
+    private void addOneItem(Long orderId) {
+        try {
+            orderService.addOneItem(orderId);
+            reload();
+        }
+        catch (OrderException e) {
+            Notification.show(e.getMessage());
+        }
+    }
+
+    private void removeOneOrder(Long orderId){
+        try {
+            orderService.removeOneOrder(orderId);
+            reload();
+
+        }
+        catch (OrderException e) {
+            Notification.show(e.getMessage());
+        }
     }
 
     private void addInvalidData() {
@@ -102,7 +138,6 @@ public class OrdersView extends VerticalLayout {
             dialog.setText(e.getMessage());
             dialog.setConfirmText("OK");
             dialog.open();
-            reload();
         }
     }
 
@@ -116,7 +151,6 @@ public class OrdersView extends VerticalLayout {
         }
         catch(OrderException e) {
             Notification.show(e.getMessage());
-            reload();
         }
     }
 
@@ -130,7 +164,6 @@ public class OrdersView extends VerticalLayout {
         }
         catch(OrderException e) {
             Notification.show(e.getMessage());
-            reload();
         }
     }
 
@@ -141,7 +174,6 @@ public class OrdersView extends VerticalLayout {
         }
         catch(OrderException e) {
             Notification.show(e.getMessage());
-            reload();
         }
     }
     private void removeAllExpressOrders() {
@@ -152,10 +184,8 @@ public class OrdersView extends VerticalLayout {
         }
         catch(OrderException e) {
             Notification.show(e.getMessage());
-            reload();
         }
     }
-
 
     private void reload() {
         grid.setItems(orderService.findAll());
