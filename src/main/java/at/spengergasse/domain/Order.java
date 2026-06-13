@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 
@@ -22,15 +23,30 @@ import lombok.*;
 public class Order {
     @Id
     private Long      orderId;
+    @NotNull (message = "order date is required")
+    @PastOrPresent(message = "order is valid only in past or present")
     private LocalDate orderDate;
+    @NotBlank(message = "customer name is required")
+    @Size(min = 3, max = 100, message = "Size of name has to be between 3 to 100 characters")
     private String    customerName;
+    @NotNull (message = "Laundry type is required")
+    @Pattern (
+            regexp = "Trousers|Dress|Skirt|Jumper|Leatherjacket",
+            message = "Laundry type has to be: Trousers, Dress, Skirt, Jumper, or Leatherjacket"
+    )
     private String    laundryType;
+    @NotNull (message = "Price is required")
+    @DecimalMin(value = "7.0", message = "Minimum price is 7 euro!")
+    @DecimalMax(value = "500.0", message = "Maximum price is 500 euro!")
     private Double    price;
+    @NotNull (message = "Number of laundry items is required")
+    @Min(value = 1, message = "At least one item of laundry has to be ordered!")
+    @Max(value = 100, message = " Maximum number of laundry items that can be ordered: 100!")
     private Integer   numberLaundry;
+    @NotNull (message = "Type of expressService (normal=false, express=true) is required")
     private Boolean   expressService;
 
     private static final AtomicLong sequence = new AtomicLong(1000);
-    private static final String [] laundryTypes = {"Trousers", "Dress", "Skirt", "Jumper", "LeatherJacket"};
 
     public Order() {
         //setOrderId();
@@ -75,8 +91,6 @@ public class Order {
     }
 
     public void setLaundryTypes(String laundryType) {
-        if (!Arrays.asList(laundryTypes).contains(laundryType))
-            throw new OrderException("Unknown laundry type!");
         this.laundryType = laundryType;
     }
 
