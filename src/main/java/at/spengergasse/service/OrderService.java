@@ -145,7 +145,12 @@ public class OrderService {
         for(Order o: orders) {
             if(o.getOrderId().equals(orderId))
                 o.setNumberLaundry(o.getNumberLaundry()+1);
-            // ==== 22min15 =======
         }
+    }
+
+    public void addOneOrder(Order order) {
+        if(order == null)
+            throw new OrderException("Order is null");
+        orders.add(order);
     }
 }

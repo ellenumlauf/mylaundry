@@ -7,21 +7,31 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import jakarta.validation.constraints.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
+
+import java.time.LocalDate;
 
 @PageTitle("Orders")
 @Route("orders")
@@ -32,6 +42,7 @@ public class OrdersView extends VerticalLayout {
     private final Button buttonAddOneEuro = new Button("Add One Euro");
     private final Button buttonRemoveAllExpressOrders = new Button("Remove All Expr-Orders");
     private final Button buttonAddInvalidData = new Button("Add Invalid Data");
+    private final Button buttonAddOneOrder = new Button("Add One Order");
     private final Grid<Order> grid = new Grid<>(Order.class, false);
     private final OrderService orderService;
 
@@ -46,8 +57,10 @@ public class OrdersView extends VerticalLayout {
         buttonAddTenOrders.addClickListener(event -> addTenOrders());
         buttonAddOneEuro.addClickListener(event -> addOneEuro());
         buttonRemoveAllExpressOrders.addClickListener(event -> removeAllExpressOrders());
+        buttonAddOneOrder.addClickListener(event -> addOneOrder());
         buttonAddInvalidData.addClickListener(event -> addInvalidData());
-        add(new HorizontalLayout(buttonRemoveAllOrders, buttonAddTenOrders, buttonAddOneEuro, buttonRemoveAllExpressOrders,buttonAddInvalidData));
+
+        add(new HorizontalLayout(buttonRemoveAllOrders, buttonAddTenOrders, buttonAddOneEuro, buttonRemoveAllExpressOrders, buttonAddOneOrder, buttonAddInvalidData));
 
         grid.addColumn(order -> order.getOrderId())
                 .setHeader("Order ID")
@@ -70,7 +83,7 @@ public class OrdersView extends VerticalLayout {
                 .setHeader("Number")
                 .setSortable(true);
         grid.addColumn(order -> order.getPrice())
-                .setHeader("Price per Item")
+                .setHeader("Price/Item")
                 .setSortable(true);
         grid.addColumn(order -> (order.getExpressService() == true) ? "Express" : "Normal")
                 .setHeader("Service")
@@ -102,6 +115,72 @@ public class OrdersView extends VerticalLayout {
 
         add(grid);
         reload();
+    }
+
+    private void addOneOrder() {
+        Dialog dialog;
+
+        dialog = new Dialog();
+        dialog.setHeaderTitle("Add One Order");
+
+        TextField  orderId = new TextField("Order ID");
+        DatePicker orderDate = new DatePicker("Order Date");
+        TextField  customerName = new TextField("Customer Name");
+        ComboBox laundryType = new ComboBox("Laundry Type");
+        laundryType.setItems("Trousers", "Dress", "Skirt", "Jumper", "Leatherjacket");
+        NumberField price = new NumberField("Price");
+        IntegerField numberLaundry = new IntegerField("Number of Laundry Items");
+        Checkbox expressService = new Checkbox("Express: Yes/No");
+
+        BeanValidationBinder<Order> binder = new BeanValidationBinder<>(Order.class);
+
+        binder.forField(orderDate).bind("orderDate");
+        binder.forField(customerName).bind("customerName");
+        binder.forField(laundryType).bind("laundryType");
+        binder.forField(price).bind("price");
+        binder.forField(numberLaundry).bind("numberLaundry");
+        binder.forField(expressService).bind("expressService");
+
+        Order order = new Order();
+        binder.setBean(order);
+
+        orderId.setValue("" + order.getOrderId());
+        orderId.setReadOnly(true);
+
+        VerticalLayout formLayout = new VerticalLayout(
+                orderId,
+                orderDate,
+                customerName,
+                laundryType,
+                price,
+                numberLaundry,
+                expressService
+        );
+
+        Button buttonOK = new Button("OK");
+        Button buttonCancel = new Button("Cancel");
+
+        buttonOK.addClickListener(event -> {
+            try {
+                if (binder.validate().isOk()) {
+                    orderService.addOneOrder(order);
+                    dialog.close();
+                    reload();
+                    Notification.show("New order added!");
+                } else {
+                    Notification.show("Check your input!");
+                }
+            }
+            catch (OrderException e) {
+                Notification.show(e.getMessage());
+            }
+        });
+        buttonCancel.addClickListener(event -> dialog.close());
+
+        dialog.add(formLayout);
+        dialog.getFooter().add(buttonOK, buttonCancel);
+
+        dialog.open();
     }
 
     private void addOneItem(Long orderId) {
