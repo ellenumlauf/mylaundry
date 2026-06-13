@@ -57,7 +57,7 @@ public class OrdersView extends VerticalLayout {
         buttonAddTenOrders.addClickListener(event -> addTenOrders());
         buttonAddOneEuro.addClickListener(event -> addOneEuro());
         buttonRemoveAllExpressOrders.addClickListener(event -> removeAllExpressOrders());
-        buttonAddOneOrder.addClickListener(event -> addOneOrder());
+        buttonAddOneOrder.addClickListener(event -> addEditOrder(null));
         buttonAddInvalidData.addClickListener(event -> addInvalidData());
 
         add(new HorizontalLayout(buttonRemoveAllOrders, buttonAddTenOrders, buttonAddOneEuro, buttonRemoveAllExpressOrders, buttonAddOneOrder, buttonAddInvalidData));
@@ -77,51 +77,67 @@ public class OrdersView extends VerticalLayout {
         HorizontalLayout headerType = new HorizontalLayout(shirt, new Span("Type"));
 
         grid.addColumn(order -> order.getLaundryType())
-                .setHeader(headerType)
-                .setSortable(true);
+             .setHeader(headerType)
+             .setSortable(true);
         grid.addColumn(order -> order.getNumberLaundry())
-                .setHeader("Number")
-                .setSortable(true);
+             .setHeader("Number")
+             .setSortable(true);
         grid.addColumn(order -> order.getPrice())
-                .setHeader("Price/Item")
-                .setSortable(true);
+             .setHeader("Price/Item")
+             .setSortable(true);
         grid.addColumn(order -> (order.getExpressService() == true) ? "Express" : "Normal")
-                .setHeader("Service")
-                .setSortable(true);
+            .setHeader("Service")
+            .setSortable(true);
         grid.addComponentColumn(order -> {
-                    Checkbox express = new Checkbox(order.getExpressService());
-                    express.setReadOnly(true);
-                    return express;
-                })
+             Checkbox express = new Checkbox(order.getExpressService());
+             express.setReadOnly(true);
+             return express;
+        })
                 // er hat .setHeader("Action")  nicht Service!!!!
-                .setHeader("Service")
-                .setSortable(true);
+            .setHeader("Service")
+            .setSortable(true);
 
         grid.addComponentColumn(order -> {
-                    Button delete = new Button("Delete");
-                    delete.addClickListener(e-> removeOneOrder(order.getOrderId()));
-                    return delete;
-                })
-                .setHeader("Action")
-                .setSortable(false);
-
-        grid.addComponentColumn(order -> {
-                Button addOneItem = new Button ("Add One Item");
-                addOneItem.addClickListener(e -> addOneItem(order.getOrderId()));
-                return addOneItem;
-            })
+            Button delete = new Button("Delete");
+            delete.addClickListener(e-> removeOneOrder(order.getOrderId()));
+            return delete;
+        })
             .setHeader("Action")
-                    .setSortable(false);
+            .setSortable(false);
+
+        grid.addComponentColumn(order -> {
+            Button addOneItem = new Button ("Add One Item");
+            addOneItem.addClickListener(e -> addOneItem(order.getOrderId()));
+            return addOneItem;
+        })
+            .setHeader("Action")
+            .setSortable(false);
+
+        grid.addComponentColumn(order -> {
+            Button editOrder = new Button("Edit");
+            editOrder.addClickListener(event -> addEditOrder(order));
+            return editOrder;
+        })
+            .setHeader("Action")
+            .setSortable(false);
 
         add(grid);
         reload();
     }
 
-    private void addOneOrder() {
+    private void addEditOrder(Order existingOrder) {
         Dialog dialog;
+        Order order;
 
         dialog = new Dialog();
-        dialog.setHeaderTitle("Add One Order");
+        if(existingOrder == null) {
+            dialog.setHeaderTitle("Add One Order");
+            order = new Order();
+        }
+        else {
+            dialog.setHeaderTitle("Edit the Order");
+            order = existingOrder;
+        }
 
         TextField  orderId = new TextField("Order ID");
         DatePicker orderDate = new DatePicker("Order Date");
@@ -141,7 +157,6 @@ public class OrdersView extends VerticalLayout {
         binder.forField(numberLaundry).bind("numberLaundry");
         binder.forField(expressService).bind("expressService");
 
-        Order order = new Order();
         binder.setBean(order);
 
         orderId.setValue("" + order.getOrderId());
@@ -163,10 +178,14 @@ public class OrdersView extends VerticalLayout {
         buttonOK.addClickListener(event -> {
             try {
                 if (binder.validate().isOk()) {
-                    orderService.addOneOrder(order);
+                    if(existingOrder == null)
+                        orderService.addOneOrder(order);
                     dialog.close();
                     reload();
-                    Notification.show("New order added!");
+                    if(existingOrder == null)
+                        Notification.show("New order added!");
+                    else
+                        Notification.show("Order was modified!");
                 } else {
                     Notification.show("Check your input!");
                 }
