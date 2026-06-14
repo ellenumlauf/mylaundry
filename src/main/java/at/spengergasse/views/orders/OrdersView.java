@@ -178,8 +178,7 @@ public class OrdersView extends VerticalLayout {
         buttonOK.addClickListener(event -> {
             try {
                 if (binder.validate().isOk()) {
-                    if(existingOrder == null)
-                        orderService.addOneOrder(order);
+                    orderService.addOneOrder(order);
                     dialog.close();
                     reload();
                     if(existingOrder == null)

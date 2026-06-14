@@ -1,8 +1,7 @@
 package at.spengergasse.domain;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -20,8 +19,11 @@ import lombok.*;
 @EqualsAndHashCode(of = "orderId", callSuper = false)
 
 @Entity
+// weil sonst laut chatgpt die table order heißt und mit der Datenbank clashed
+@Table(name = "laundry_order")
 public class Order {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long      orderId;
     @NotNull (message = "order date is required")
     @PastOrPresent(message = "order is valid only in past or present")
@@ -46,10 +48,7 @@ public class Order {
     @NotNull (message = "Type of expressService (normal=false, express=true) is required")
     private Boolean   expressService;
 
-    private static final AtomicLong sequence = new AtomicLong(1000);
-
     public Order() {
-        setOrderId();
         setOrderDate(LocalDate.now());
         setCustomerName("unknown");
         setLaundryType("Trousers");
@@ -60,7 +59,6 @@ public class Order {
     }
 
     public Order(LocalDate orderDate, String customerName, String laundryType, Double price, Integer numberLaundry, Boolean expressService) {
-        setOrderId();
         setOrderDate(orderDate);
         setCustomerName(customerName);
         setLaundryType(laundryType);
@@ -78,9 +76,6 @@ public class Order {
         setExpressService(expressService);
     }
 
-    public void setOrderId() {
-        orderId = sequence.getAndIncrement();
-    }
 
     public void setPrice(Double price) {
         if (price < 7)
